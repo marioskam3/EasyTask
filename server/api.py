@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import JSONResponse
 from database.dbconnect import get_supabase_client
 from models.user import User
+from postgrest.exceptions import APIError
 import bcrypt
+
 
 app = FastAPI()
 supabase=get_supabase_client()
@@ -23,37 +26,54 @@ async def signup(user: User):
             "password_hash": hashed
         }).execute()
 
-        print(response)
-
-        if len(response.data) > 0:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="User not created")
-
-        return response.data
+        return JSONResponse(
+                status_code=status.HTTP_201_CREATED,
+                content={"success": "true", "message": "User created successfully", "data": response.data}
+            )
     
-        
-    
-    except Exception as exception:
-         return exception
+    except APIError as e:
+        error_message = eval(e.args[0])
+        error_code = error_message.get('code')
+        if error_code == '23505':
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content={"success": "false","message": "Username or Email already exists"}
+            )
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"success": "false" , "message": "Internal Server Error"}
+            )
 
         
 
 
 @app.get("/auth/signin")
 async def signup(username: str, password: str):
-    try:
-        response = supabase.table('Users').select().eq('username', username).execute()
-
-        if response.status_code == 200:
-            if len(response.data) == 0:
-                raise HTTPException(status_code=404, detail="User not found")
-            user = response.data[0]
-            if bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
-                return {"message": "User signed in successfully", "user_id": user['id']}
-            else:
-                raise HTTPException(status_code=401, detail="Invalid password")
-        else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=response.json())
         
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+            response = supabase.table('Users').select('*').eq('username', username).execute()
+
+
+            if response.data == []:
+                return JSONResponse(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    content={"success": "false", "message": "User not found"}
+                )
+            
+            password_hash = response.data[0]['password_hash']
+
+            if bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8')):
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={"success": "true", "message": "User signed in successfully",  "user_id": response.data[0]['userid']}
+                )
+            else:
+                return JSONResponse(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    content={"success": "false" , "message": "Invalid Password"}
+                )
+        
+        
+        
+    
     
