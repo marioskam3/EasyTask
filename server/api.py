@@ -28,8 +28,11 @@ async def signup(user: User):
 
         return JSONResponse(
                 status_code=status.HTTP_201_CREATED,
-                content={"success": "true", "message": "User created successfully", "data": response.data}
-            )
+                content={
+                    "success": "true",
+                    "message": "User created successfully",
+                    "data": response.data
+            })
     
     except APIError as e:
         error_message = eval(e.args[0])
@@ -37,13 +40,17 @@ async def signup(user: User):
         if error_code == '23505':
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
-                content={"success": "false","message": "Username or Email already exists"}
-            )
+                content={
+                    "success": "false",
+                    "message": "Username or Email already exists"
+            })
         else:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"success": "false" , "message": "Internal Server Error"}
-            )
+                content={
+                    "success": "false" , 
+                    "message": "Internal Server Error"
+            })
 
         
 
@@ -51,28 +58,42 @@ async def signup(user: User):
 @app.get("/auth/signin")
 async def signup(username: str, password: str):
         
+        try:
             response = supabase.table('Users').select('*').eq('username', username).execute()
 
 
             if response.data == []:
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content={"success": "false", "message": "User not found"}
-                )
+                    content={
+                        "success": "false",
+                        "message": "User not found"
+                })
             
             password_hash = response.data[0]['password_hash']
 
             if bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8')):
                 return JSONResponse(
                     status_code=status.HTTP_200_OK,
-                    content={"success": "true", "message": "User signed in successfully",  "user_id": response.data[0]['userid']}
-                )
+                    content={
+                        "success": "true",
+                        "message": "User signed in successfully",
+                        "user_id": response.data[0]['userid']
+                })
             else:
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"success": "false" , "message": "Invalid Password"}
-                )
-        
+                    content={
+                        "success": "false",
+                        "message": "Invalid Password"
+                })
+        except APIError as e:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "success": "false" , 
+                    "message": "Internal Server Error"
+            })
         
         
     
