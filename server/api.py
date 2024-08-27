@@ -19,7 +19,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
     "http://localhost:3000", 
-    "http://localhost:8000"
+    "http://localhost:8000",
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
@@ -34,7 +35,7 @@ app.add_middleware(
 async def root():
     return 'ok'
 
-@app.post("/auth/signup")
+@app.post("/signup")
 async def signup(user: User):
 
     salt = bcrypt.gensalt()
