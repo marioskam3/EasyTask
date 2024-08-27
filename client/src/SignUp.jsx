@@ -1,4 +1,9 @@
 import React, { useState } from "react";
+import { ToastContainer,toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
+
+
 
 const SignUp = () => {
 
@@ -6,6 +11,7 @@ const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isPending, setIsPending] = useState(false);
+    let navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,9 +27,19 @@ const SignUp = () => {
             });
     
             if (!response.ok) {
-                throw new Error("Failed to create a new user");
+                if (response.status === 409) {
+                    toast.error("Username or email already exists.");
+                    throw new Error("Username or email already exists.");
+                    
+                }
+                else {
+                    toast.error("Failed to create a new user");
+                    throw new Error("Failed to create a new user");
+                }
             }
-    
+            
+            toast.success("Account created successfully");
+            navigate('/signin');
             console.log("New user added");
         } catch (err) {
             console.log(err.message);
@@ -64,6 +80,20 @@ const SignUp = () => {
                 {!isPending && <button>Sign Up</button>}
                 {isPending && <button disabled>Wait...</button>}
             </form>
+
+            <ToastContainer 
+                position="top-center"
+                autoClose={2000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition: Flip
+            />
         </div>
     );
 }
