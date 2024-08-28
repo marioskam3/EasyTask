@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, HTTPException, status, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
@@ -52,8 +52,7 @@ async def signup(user: User):
                 status_code=status.HTTP_201_CREATED,
                 content={
                     "success": "true",
-                    "message": "User created successfully",
-                    "data": response.data
+                    "message": "User created successfully"
             })
     
     except APIError as e:
@@ -183,9 +182,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
                 "message": "Internal Server Error"
         })
     
-@app.get("/verify-token/{token}")
-async def verify_token(token: str):
+@app.post("/verify-token")
+async def verify_token(request: Request):
     try:
+        body = await request.json()
+        token = body.get("token")
+        
         payload = jwt.decode(token, os.environ.get("JWT_SECRET"), algorithms=[os.environ.get("ALGORITHM")])
         return JSONResponse(
             status_code=status.HTTP_200_OK,

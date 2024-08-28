@@ -42,7 +42,9 @@ const SignIn = () => {
                 throw new Error("Failed to sign in user");
             }
             
+            const data = await response.json();
             toast.success("User Signed In successfully");
+            localStorage.setItem('token', data.access_token );
             navigate('/home');
             console.log("User signed in");
         } catch (err) {
