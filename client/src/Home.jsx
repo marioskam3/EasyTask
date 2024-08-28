@@ -15,7 +15,6 @@ const Home = () => {
         <div>
             <h1>Home</h1>
             <p>Welcome to the Home page</p>
-            <p>{localStorage.getItem('token')}</p>
         </div>
     );
 }
