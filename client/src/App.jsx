@@ -14,7 +14,9 @@ function AppContent() {
   return (
     <div className="App">
       <div className="content">
-        {location.pathname === '/home' ? <HomeNavbar /> : <Navbar />}
+        {location.pathname === '/' || 
+         location.pathname === '/signin' ||
+         location.pathname === '/signup'? <Navbar /> : <HomeNavbar />}
         <Routes>
           <Route exact path="/" element={<Welcome />} />
           <Route path="/signin" element={<SignIn />} />
