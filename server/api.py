@@ -133,7 +133,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-@app.post("/token")
+@app.post("/signin")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     username=form_data.username 
     password=form_data.password
