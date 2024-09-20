@@ -45,6 +45,8 @@ const SignIn = () => {
             const data = await response.json();
             toast.success("User Signed In successfully");
             localStorage.setItem('token', data.access_token );
+            localStorage.setItem('userid', data.user_id);
+            localStorage.setItem('username', data.username);
             navigate('/home');
             console.log("User signed in");
         } catch (err) {

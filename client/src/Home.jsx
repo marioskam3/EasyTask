@@ -13,8 +13,9 @@ const Home = () => {
 
     return (
         <div>
-            <h1>Home</h1>
-            <p>Welcome to the Home page</p>
+            <h2 style={{
+                    marginTop: "50px",
+            }}>What's your vision for today ?</h2>
         </div>
     );
 }

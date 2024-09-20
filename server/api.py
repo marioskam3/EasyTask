@@ -155,7 +155,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
             if bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8')):
                 access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
                 access_token = create_access_token(
-                data={"sub": username}, expires_delta=access_token_expires
+                data={"userid": response.data[0]['userid']}, expires_delta=access_token_expires
                 )
                  
                 return JSONResponse(
@@ -165,7 +165,8 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
                         "message": "User signed in successfully",
                         "access_token": access_token,
                         "token_type": "bearer",
-                        "user_id": response.data[0]['userid']
+                        "user_id": response.data[0]['userid'],
+                        "username": username
                 })
             else:
                 return JSONResponse(
