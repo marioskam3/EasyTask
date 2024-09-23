@@ -1,16 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
 const verifyToken = async (navigate) => {
-
-    
-
-    const token = localStorage.getItem("token");
     
     try {
         const response = await fetch(`http://localhost:8000/verify-token`,{
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ token: token }),  
+            credentials: "include"
     });
 
         if (!response.ok) {
