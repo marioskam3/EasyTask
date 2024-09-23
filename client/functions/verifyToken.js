@@ -24,6 +24,7 @@ const verifyToken = async (navigate) => {
         
 
     } catch (err) {
+        localStorage.removeItem("token");
         localStorage.removeItem('userid');
         localStorage.removeItem('username');
     
