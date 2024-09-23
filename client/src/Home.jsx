@@ -6,7 +6,7 @@ const Home = () => {
 
     let navigate = useNavigate();
     useEffect(() => {
-        verifyToken(navigate);
+        //verifyToken(navigate);
     }, []);
 
     
