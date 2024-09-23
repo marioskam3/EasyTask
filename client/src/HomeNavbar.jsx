@@ -2,6 +2,7 @@ const HomeNavbar = () => {
 
 
     const handSignOut = () => {
+        localStorage.removeItem('token');
         localStorage.removeItem('userid');
         localStorage.removeItem('username');
     }
