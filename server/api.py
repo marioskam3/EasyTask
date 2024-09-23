@@ -75,51 +75,6 @@ async def signup(user: User):
 
       
 
-'''
-@app.post("/auth/signin")
-async def signup(signin_request: SignInRequest):
-        
-        username = signin_request.username
-        password = signin_request.password
-        
-        try:
-            response =  supabase.table('Users').select('*').eq('username', username).execute()
-
-
-            if response.data == []:
-                return JSONResponse(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    content={
-                        "success": "false",
-                        "message": "User not found"
-                })
-            
-            password_hash = response.data[0]['password_hash']
-
-            if bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8')):
-                return JSONResponse(
-                    status_code=status.HTTP_200_OK,
-                    content={
-                        "success": "true",
-                        "message": "User signed in successfully",
-                        "user_id": response.data[0]['userid']
-                })
-            else:
-                return JSONResponse(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={
-                        "success": "false",
-                        "message": "Invalid Password"
-                })
-        except APIError as e:
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={
-                    "success": "false" , 
-                    "message": "Internal Server Error"
-            })
-
-'''
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
@@ -158,16 +113,26 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
                 data={"userid": response.data[0]['userid']}, expires_delta=access_token_expires
                 )
                  
-                return JSONResponse(
+                response = JSONResponse(
                     status_code=status.HTTP_200_OK,
                     content={
                         "success": "true",
                         "message": "User signed in successfully",
-                        "access_token": access_token,
-                        "token_type": "bearer",
                         "user_id": response.data[0]['userid'],
                         "username": username
                 })
+            
+                response.set_cookie(
+                    key="access_token", 
+                    value=f"Bearer {access_token}", 
+                    httponly=True,  # Make the cookie HttpOnly for security
+                    max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Convert minutes to seconds
+                    expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                    samesite="Strict",  # Adjust as per your requirements ('Strict', 'None' or 'Lax')
+                    secure=True  # Use Secure=True in production (HTTPS)
+                )
+
+                return response
             else:
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
