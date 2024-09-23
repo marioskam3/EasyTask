@@ -24,7 +24,6 @@ const SignIn = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData.toString(),
-                credentials: "include"
             });
     
             if (!response.ok) {
@@ -45,7 +44,7 @@ const SignIn = () => {
             
             const data = await response.json();
             toast.success("User Signed In successfully");
-            //localStorage.setItem('token', data.access_token );
+            localStorage.setItem('token', data.access_token );
             localStorage.setItem('userid', data.user_id);
             localStorage.setItem('username', data.username);
             navigate('/home');
