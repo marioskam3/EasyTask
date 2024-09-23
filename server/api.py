@@ -165,7 +165,6 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
                         "message": "User signed in successfully",
                         "access_token": access_token,
                         "token_type": "bearer",
-                        "user_id": response.data[0]['userid'],
                         "username": username
                 })
             else:
