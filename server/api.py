@@ -27,7 +27,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -124,12 +124,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
             
                 response.set_cookie(
                     key="access_token", 
-                    value=access_token, 
+                    value=f"Bearer {access_token}", 
                     httponly=True,  # Make the cookie HttpOnly for security
                     max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Convert minutes to seconds
                     expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
                     samesite="Strict",  # Adjust as per your requirements ('Strict', 'None' or 'Lax')
-                    secure=True, # Use Secure=True in production (HTTPS)
+                    secure=True  # Use Secure=True in production (HTTPS)
                 )
 
                 return response
@@ -151,19 +151,17 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.post("/verify-token")
 async def verify_token(request: Request):
     try:
+        body = await request.json()
+        token = body.get("token")
         
-        token = request.cookies.get("access_token")
-        print(token)
-
-        if not token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token is missing from cookies",
-            )
-        
-        payload = jwt.decode(token, os.environ.get("JWT_SECRET"), os.environ.get("ALGORITHM"))
-        return payload
-    
+        payload = jwt.decode(token, os.environ.get("JWT_SECRET"), algorithms=[os.environ.get("ALGORITHM")])
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "success": "true",
+                "message": "Token is valid",
+                "data": payload
+        })
     except JWTError:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
